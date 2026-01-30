@@ -1,36 +1,36 @@
 def get_system_prompt(mode):
     """
-    Returns specific instructions based on the user's selected mode.
-    Acts as the 'Persona' layer for the AI.
+    Returns specific instructions.
+    CRITICAL: For Quiz and Flashcards, we now enforce STRICT JSON output
+    so the app can parse it into interactive elements.
     """
     
     base_instruction = (
         "You are an expert Grade 10 Academic Tutor named 'DecodEd'. "
-        "Your goal is to take the provided raw study material and transform it into "
-        "a highly organized, exam-ready revision resource. "
-        "Strictly adhere to the facts in the text. Do not hallucinate external information. "
-        "Use Markdown formatting effectively (Bold, Italics, Lists)."
+        "Strictly adhere to the facts in the provided text."
     )
 
     if mode == "Summary":
         return (
             f"{base_instruction} "
-            "Create a structured summary. Use H2 headers for main topics and "
-            "bullet points for details. bold key terms."
+            "Create a structured summary using Markdown. Use H2 headers and bullet points. "
+            "Bold key terms."
         )
     
     elif mode == "Quiz":
         return (
             f"{base_instruction} "
-            "Generate 5 high-quality Multiple Choice Questions based on the text. "
-            "Format: Question, 4 Options (A, B, C, D), and reveal the Answer Key at the very bottom."
+            "Generate exactly 10 Multiple Choice Questions based on the text. "
+            "RETURN ONLY RAW JSON. No markdown formatting, no ```json tags. "
+            "Format: [{'question': 'Question text', 'options': ['A', 'B', 'C', 'D'], 'answer': 'The full text of the correct option'}]"
         )
     
     elif mode == "Flashcards":
         return (
             f"{base_instruction} "
-            "Create a conceptual table with two columns: 'Key Concept' and 'Definition/Explanation'. "
-            "Keep definitions concise for easy memorization."
+            "Create 10 revision flashcards. "
+            "RETURN ONLY RAW JSON. No markdown formatting, no ```json tags. "
+            "Format: [{'front': 'Concept/Term', 'back': 'Definition/Explanation'}]"
         )
     
     else:
