@@ -6,7 +6,6 @@ import datetime
 import api_controller
 
 # --- DYNAMIC PATHING (Fixes Cloud Image Issues) ---
-# This identifies the folder where main.py is located
 base_path = os.path.dirname(__file__)
 
 # --- CONFIGURATION ---
@@ -126,7 +125,6 @@ with navbar_container:
     c_logo, c_space, c_h, c_d, c_n, c_a, c_s = st.columns([2.5, 0.5, 1.2, 1.2, 1.2, 1.2, 1.2], gap="small")
     
     with c_logo:
-        # Fixed path and Case Sensitivity for Logo
         logo_img_path = os.path.join(base_path, "Logo.png")
         if os.path.exists(logo_img_path):
              st.image(logo_img_path, width=220) 
@@ -161,7 +159,6 @@ if st.session_state.page == 'Home':
             st.rerun()
 
     with c_hero_img:
-        # Fixed path and Case Sensitivity for Hero Image
         home_img_path = os.path.join(base_path, "home.png")
         if os.path.exists(home_img_path):
             st.image(home_img_path, use_container_width=True)
@@ -193,6 +190,18 @@ elif st.session_state.page == 'Dashboard':
     with c_search:
         st.markdown("<br>", unsafe_allow_html=True)
         search_query = st.text_input("Search", placeholder="🔍 Search notes...", label_visibility="collapsed")
+
+    # --- ADDED: QUICK API KEY SETUP IN DASHBOARD ---
+    if not st.session_state.api_key:
+        with st.container(border=True):
+            st.warning("🔑 AI Features are currently locked. Please enter your Gemini API Key below.")
+            col_key1, col_key2 = st.columns([4, 1])
+            temp_key = col_key1.text_input("Enter API Key", type="password", label_visibility="collapsed", placeholder="Paste Gemini Key Here...")
+            if col_key2.button("Save Key", use_container_width=True):
+                if temp_key:
+                    st.session_state.api_key = temp_key
+                    st.success("API Key Saved!")
+                    st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     c1, c2 = st.columns(2)
@@ -319,14 +328,25 @@ elif st.session_state.page == 'Editor':
         output_container = st.container(border=True)
         with output_container:
             if run_btn:
+                # --- UPDATED: IMPROVED ERROR HANDLING IN EDITOR ---
                 if not st.session_state.api_key:
-                    st.error("Missing API Key.")
+                    st.error("🚨 Error: Missing API Key.")
+                    st.info("You must provide a Gemini API key to use the AI features.")
+                    # Provide an immediate way to enter it
+                    new_key = st.text_input("Paste API Key here to fix:", type="password")
+                    if st.button("Connect Key"):
+                        st.session_state.api_key = new_key
+                        st.success("Key connected! Click 'Run' again.")
+                        st.rerun()
                 elif not user_text:
-                    st.warning("No text to process.")
+                    st.warning("No text to process. Please paste your syllabus content in the input box.")
                 else:
-                    with st.spinner("Processing..."):
-                        res = api_controller.get_ai_response(st.session_state.api_key, user_text, mode)
-                        st.markdown(res)
-                        st.session_state.current_note_content += f"\n\n--- AI {mode} ---\n{res}"
+                    with st.spinner("Decoding your material..."):
+                        try:
+                            res = api_controller.get_ai_response(st.session_state.api_key, user_text, mode)
+                            st.markdown(res)
+                            st.session_state.current_note_content += f"\n\n--- AI {mode} ---\n{res}"
+                        except Exception as e:
+                            st.error(f"API Error: {str(e)}")
             else:
                 st.write("AI Output will appear here...")
