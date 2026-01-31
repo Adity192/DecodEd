@@ -173,18 +173,18 @@ def apply_theme():
             font-family: 'Inter', sans-serif;
         }
 
-        /* 3. NAVBAR BUTTONS (Larger & Centered) */
+        /* 3. NAVBAR BUTTONS (Big & Centered) */
         /* We target secondary buttons used in the navbar */
         div.stButton > button[kind="secondary"] {
             background-color: #110e1b;
             color: #ffffff !important;
             border: 2px solid #7c3aed; /* Thicker Purple border */
-            border-radius: 25px; /* Larger pill shape */
-            font-size: 18px; /* Larger Text */
+            border-radius: 30px; /* Big pill shape */
+            font-size: 20px; /* Bigger Text */
             font-weight: 700;
-            padding: 0px 10px; /* Adjust internal padding */
+            padding: 0px 20px;
             width: 100%;
-            height: 4rem; /* Taller button */
+            height: 4.5rem; /* Taller button */
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             white-space: nowrap;
@@ -275,9 +275,9 @@ apply_theme()
 # Using columns with vertical_alignment="center" to align logo and buttons perfectly
 navbar_container = st.container()
 with navbar_container:
-    # Adjusted ratios to give more space for the larger buttons
+    # Increased widths for button columns to support larger buttons
     c_logo, c_space, c_h, c_d, c_n, c_a, c_s = st.columns(
-        [2.5, 0.2, 1, 1.3, 1.2, 1.2, 1.2], gap="small", vertical_alignment="center"
+        [3, 0.5, 1.5, 1.5, 1.5, 1.5, 1.5], gap="small", vertical_alignment="center"
     )
     
     with c_logo:
