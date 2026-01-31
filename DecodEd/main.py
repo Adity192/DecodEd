@@ -113,20 +113,9 @@ def apply_theme():
             background-color: #1e1b2e;
             border: 2px solid #a78bfa;
             border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            min-height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.2);
+            padding: 40px; text-align: center; font-size: 24px; font-weight: bold; color: white; min-height: 250px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(167, 139, 250, 0.2);
         }
-
         h1, h2, h3 { color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        
     </style>
     """, unsafe_allow_html=True)
 
@@ -135,8 +124,6 @@ if 'page' not in st.session_state: st.session_state.page = 'Home'
 if 'api_key' not in st.session_state: st.session_state.api_key = ""
 if 'current_note_content' not in st.session_state: st.session_state.current_note_content = ""
 if 'current_note_title' not in st.session_state: st.session_state.current_note_title = ""
-
-# --- QUIZ & FLASHCARD STATE ---
 if 'quiz_data' not in st.session_state: st.session_state.quiz_data = None
 if 'flashcard_data' not in st.session_state: st.session_state.flashcard_data = None
 if 'fc_index' not in st.session_state: st.session_state.fc_index = 0
@@ -149,14 +136,12 @@ navbar_container = st.container()
 with navbar_container:
     c_logo, c_space, c_h, c_d, c_n, c_a, c_s = st.columns([2.5, 0.5, 1.2, 1.2, 1.2, 1.2, 1.2], gap="small")
     with c_logo:
-        # UPDATED: Corrected to look for Logo.png specifically
-        if os.path.exists("Logo.png"): 
-            st.image("Logo.png", width=220) 
-        elif os.path.exists("logo.png"): 
-            st.image("logo.png", width=220) 
-        else: 
-            st.markdown("### DecodEd")
-            
+        # UPDATED: Using absolute path detection to find Logo.png in the script folder
+        logo_path = os.path.join(os.path.dirname(__file__), "Logo.png")
+        logo_path_alt = os.path.join(os.path.dirname(__file__), "logo.png")
+        if os.path.exists(logo_path): st.image(logo_path, width=220) 
+        elif os.path.exists(logo_path_alt): st.image(logo_path_alt, width=220)
+        else: st.markdown("### DecodEd")
     with c_h:
         if st.button("HOME", key="nav_home"): st.session_state.page = "Home"; st.rerun()
     with c_d:
@@ -181,15 +166,12 @@ if st.session_state.page == 'Home':
         if st.button("START DECODING 🚀", type="primary"):
             st.session_state.page = "Dashboard"; st.rerun()
     with c_hero_img:
-        # UPDATED: Corrected to look for home.png specifically
-        if os.path.exists("home.png"): 
-            st.image("home.png", use_container_width=True)
-        elif os.path.exists("Home.png"): 
-            st.image("Home.png", use_container_width=True)
-        elif os.path.exists("home.jpg"): 
-            st.image("home.jpg", use_container_width=True)
-        else: 
-            st.image("https://img.freepik.com/free-vector/gradient-ui-ux-elements-background_23-2149056159.jpg", use_container_width=True)
+        # UPDATED: Using absolute path detection to find home.png in the script folder
+        home_path = os.path.join(os.path.dirname(__file__), "home.png")
+        home_path_alt = os.path.join(os.path.dirname(__file__), "Home.png")
+        if os.path.exists(home_path): st.image(home_path, use_container_width=True)
+        elif os.path.exists(home_path_alt): st.image(home_path_alt, use_container_width=True)
+        else: st.image("https://img.freepik.com/free-vector/gradient-ui-ux-elements-background_23-2149056159.jpg", use_container_width=True)
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     f1, f2, f3 = st.columns(3)
@@ -304,16 +286,12 @@ elif st.session_state.page == 'Editor':
                 else:
                     with st.spinner("Processing..."):
                         response_data = api_controller.get_ai_response(st.session_state.api_key, user_text, mode)
-                        
-                        # --- LOGIC TO HANDLE QUIZ & FLASHCARDS REDIRECTION ---
                         if mode == "Quiz":
                             if isinstance(response_data, list): 
                                 st.session_state.quiz_data = response_data
                                 st.session_state.page = "Active Quiz"
                                 st.rerun()
-                            else:
-                                st.error("AI failed to generate quiz structure. Try again.")
-                        
+                            else: st.error("AI failed to generate quiz structure. Try again.")
                         elif mode == "Flashcards":
                             if isinstance(response_data, list):
                                 st.session_state.flashcard_data = response_data
@@ -321,9 +299,7 @@ elif st.session_state.page == 'Editor':
                                 st.session_state.fc_flipped = False
                                 st.session_state.page = "Active Flashcards"
                                 st.rerun()
-                            else:
-                                st.error("AI failed to generate flashcards. Try again.")
-                                
+                            else: st.error("AI failed to generate flashcards. Try again.")
                         else:
                             st.markdown(response_data)
                             st.session_state.current_note_content += f"\n\n--- AI {mode} ---\n{response_data}"
@@ -332,7 +308,6 @@ elif st.session_state.page == 'Editor':
 elif st.session_state.page == 'Active Quiz':
     st.button("← Back to Editor", on_click=lambda: st.session_state.update(page="Editor"))
     st.title("🧠 Active Recall Quiz")
-    
     if st.session_state.quiz_data:
         score = 0
         with st.form("quiz_form"):
@@ -340,39 +315,36 @@ elif st.session_state.page == 'Active Quiz':
                 st.markdown(f"**{i+1}. {q.get('question', 'Error')}:**")
                 choice = st.radio("Select an option:", q.get('options', []), key=f"q_{i}", label_visibility="collapsed")
                 st.markdown("---")
-                if choice == q.get('answer'):
-                    score += 1
-
+                if choice == q.get('answer'): score += 1
             submitted = st.form_submit_button("Submit Quiz", type="primary")
             if submitted:
                 st.markdown(f"## 🏆 Your Score: {score} / {len(st.session_state.quiz_data)}")
-                if score == len(st.session_state.quiz_data):
-                    st.balloons()
+                if score == len(st.session_state.quiz_data): st.balloons()
+                elif score > len(st.session_state.quiz_data)/2: st.success("Great job!")
+                else: st.warning("Review the material and try again.")
+    else: st.error("No quiz data found.")
 
 # --- PAGE: ACTIVE FLASHCARDS ---
 elif st.session_state.page == 'Active Flashcards':
     st.button("← Back to Editor", on_click=lambda: st.session_state.update(page="Editor"))
     st.title("⚡ Flashcards")
-    
     if st.session_state.flashcard_data:
         idx = st.session_state.fc_index
         card = st.session_state.flashcard_data[idx]
         total = len(st.session_state.flashcard_data)
         st.progress((idx + 1) / total)
-        
+        st.caption(f"Card {idx + 1} of {total}")
         content = card['back'] if st.session_state.fc_flipped else card['front']
         st.markdown(f"""<div class="flashcard">{content}</div>""", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        
         col_prev, col_flip, col_next = st.columns([1, 2, 1])
         with col_prev:
-            if st.button("Previous") and idx > 0:
-                st.session_state.fc_index -= 1; st.session_state.fc_flipped = False; st.rerun()
+            if st.button("Previous"):
+                if idx > 0: st.session_state.fc_index -= 1; st.session_state.fc_flipped = False; st.rerun()
         with col_flip:
-            if st.button("Flip 🔄", type="primary", use_container_width=True):
-                st.session_state.fc_flipped = not st.session_state.fc_flipped; st.rerun()
+            btn_text = "Show Answer 🔄" if not st.session_state.fc_flipped else "Show Question 🔄"
+            if st.button(btn_text, type="primary", use_container_width=True): st.session_state.fc_flipped = not st.session_state.fc_flipped; st.rerun()
         with col_next:
-            if st.button("Next") and idx < total - 1:
-                st.session_state.fc_index += 1; st.session_state.fc_flipped = False; st.rerun()
-    else:
-        st.error("No flashcard data found.")
+            if st.button("Next"):
+                if idx < total - 1: st.session_state.fc_index += 1; st.session_state.fc_flipped = False; st.rerun()
+    else: st.error("No flashcard data found.")
