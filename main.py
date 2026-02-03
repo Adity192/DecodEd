@@ -10,7 +10,7 @@ st.set_page_config(page_title="DecodEd", page_icon="⚡", layout="wide")
 
 # --- DATA MANAGEMENT ---
 NOTES_FILE = "my_notes.json"
-MAX_PDF_PAGES = 40  # Performance: limit pages for very large PDFs
+MAX_PDF_PAGES = 40 # Performance: limit pages for very large PDFs
 
 # Performance: Simple cache to avoid re-initializing or re-listing models frequently
 if "model_cache" not in st.session_state:
@@ -29,7 +29,7 @@ def save_note(title, content):
     notes = load_notes()
     # Normalize title
     safe_title = title.strip() if title and title.strip() else "Untitled Note"
-    
+
     existing = next((item for item in notes if item["title"] == safe_title), None)
     if existing:
         existing["content"] = content
@@ -52,7 +52,6 @@ def delete_note(title):
         json.dump(notes, f, ensure_ascii=False, indent=2)
 
 # --- AI LOGIC (Integrated API Model & Controller) ---
-
 def get_system_prompt(mode):
     """
     Returns specific instructions based on the selected mode.
@@ -261,7 +260,8 @@ def apply_theme():
 
 # --- INIT SESSION STATE ---
 if "page" not in st.session_state: st.session_state.page = "Home"
-if "api_key" not in st.session_state: st.session_state.api_key = ""
+# DEFAULT API KEY SET HERE
+if "api_key" not in st.session_state: st.session_state.api_key = "AIzaSyBf-kROykmRTMQRYhLLt8Q20Tr6SyyRB5Y"
 if "current_note_content" not in st.session_state: st.session_state.current_note_content = ""
 if "current_note_title" not in st.session_state: st.session_state.current_note_title = ""
 if "quiz_data" not in st.session_state: st.session_state.quiz_data = None
@@ -279,7 +279,7 @@ with navbar_container:
     c_logo, c_space, c_h, c_d, c_n, c_a, c_s = st.columns(
         [3, 0.5, 1.5, 1.5, 1.5, 1.5, 1.5], gap="small", vertical_alignment="center"
     )
-    
+
     with c_logo:
         # Robust path detection for the Logo
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -309,11 +309,10 @@ with navbar_container:
         if st.button("SETTINGS", key="nav_sett", type="secondary"):
             st.session_state.page = "Settings"
             st.rerun()
-
-st.markdown(
-    "<div style='height: 2px; background: linear-gradient(90deg, #05020a, #7c3aed, #05020a); margin-top: 10px; margin-bottom: 30px;'></div>",
-    unsafe_allow_html=True,
-)
+    st.markdown(
+        "<div style='height: 2px; background: linear-gradient(90deg, #05020a, #7c3aed, #05020a); margin-top: 10px; margin-bottom: 30px;'></div>",
+        unsafe_allow_html=True,
+    )
 
 # --- PAGE: HOME ---
 if st.session_state.page == "Home":
@@ -326,7 +325,7 @@ if st.session_state.page == "Home":
         )
         st.markdown(
             """<p style='font-size: 1.4rem; margin-top: 25px; margin-bottom: 35px; color: #cbd5e1; line-height: 1.6;'>
-            Transforming raw study material into interactive, beneficial learning tools. 
+            Transforming raw study material into interactive, beneficial learning tools.
             An AI-powered inquiry into efficient revision.
             </p>""",
             unsafe_allow_html=True,
@@ -334,7 +333,7 @@ if st.session_state.page == "Home":
         if st.button("START DECODING 🚀", type="primary"):
             st.session_state.page = "Dashboard"
             st.rerun()
-            
+
     with c_hero_img:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         home_path = os.path.join(base_dir, "home.png")
@@ -490,7 +489,7 @@ elif st.session_state.page == "My Notes":
 # --- PAGE: ABOUT US ---
 elif st.session_state.page == "About Us":
     st.title("About DecodEd")
-    
+
     with st.container(border=True):
         st.markdown("""
         ### 🎯 The Motive
@@ -622,7 +621,7 @@ elif st.session_state.page == "Active Quiz":
         on_click=lambda: st.session_state.update(page="Editor"),
     )
     st.title("🧠 Active Recall Quiz")
-    
+
     if st.session_state.quiz_data:
         score = 0
         total = len(st.session_state.quiz_data)
@@ -661,7 +660,7 @@ elif st.session_state.page == "Active Flashcards":
         on_click=lambda: st.session_state.update(page="Editor"),
     )
     st.title("⚡ Flashcards")
-    
+
     if st.session_state.flashcard_data:
         idx = st.session_state.fc_index
         card = st.session_state.flashcard_data[idx]
