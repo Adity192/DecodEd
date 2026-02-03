@@ -248,7 +248,7 @@ def apply_theme():
     )
 
 if "page" not in st.session_state: st.session_state.page = "Home"
-if "api_key" not in st.session_state: st.session_state.api_key = "AIzaSyBf-kROykmRTMQRYhLLt8Q20Tr6SyyRB5Y"
+if "api_key" not in st.session_state: st.session_state.api_key = ""
 if "current_note_content" not in st.session_state: st.session_state.current_note_content = ""
 if "current_note_title" not in st.session_state: st.session_state.current_note_title = ""
 if "quiz_data" not in st.session_state: st.session_state.quiz_data = None
