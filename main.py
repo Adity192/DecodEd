@@ -638,7 +638,11 @@ elif st.session_state.page == "Active Flashcards":
         st.progress((idx + 1) / total)
         st.caption(f"Card {idx + 1} of {total}")
         
-        content = card["back"] if st.session_state.fc_flipped else card["front"]
+        card_keys = list(card.keys())
+        f_key = next((k for k in card_keys if k.lower() in ["front", "term", "concept", "question"]), card_keys[0])
+        b_key = next((k for k in card_keys if k.lower() in ["back", "definition", "explanation", "answer"]), card_keys[1] if len(card_keys) > 1 else card_keys[0])
+
+        content = card[b_key] if st.session_state.fc_flipped else card[f_key]
         st.markdown(
             f"""<div class="flashcard">{content}</div>""", unsafe_allow_html=True
         )
