@@ -5,14 +5,11 @@ import json
 import datetime
 import google.generativeai as genai
 
-# --- CONFIGURATION ---
 st.set_page_config(page_title="DecodEd", page_icon="⚡", layout="wide")
 
-# --- DATA MANAGEMENT ---
 NOTES_FILE = "my_notes.json"
-MAX_PDF_PAGES = 40 # Performance: limit pages for very large PDFs
+MAX_PDF_PAGES = 40
 
-# Performance: Simple cache to avoid re-initializing or re-listing models frequently
 if "model_cache" not in st.session_state:
     st.session_state.model_cache = {}
 
@@ -27,7 +24,6 @@ def load_notes():
 
 def save_note(title, content):
     notes = load_notes()
-    # Normalize title
     safe_title = title.strip() if title and title.strip() else "Untitled Note"
 
     existing = next((item for item in notes if item["title"] == safe_title), None)
@@ -51,7 +47,6 @@ def delete_note(title):
     with open(NOTES_FILE, "w", encoding="utf-8") as f:
         json.dump(notes, f, ensure_ascii=False, indent=2)
 
-# --- AI LOGIC (Integrated API Model & Controller) ---
 def get_system_prompt(mode):
     """
     Returns specific instructions based on the selected mode.
@@ -101,10 +96,8 @@ def get_ai_response(api_key, user_text, mode):
         return "Error: Input text is empty."
 
     try:
-        # 1. Configure API
         genai.configure(api_key=api_key)
 
-        # 2. Smart Model Selector (Cached)
         if "target_model" not in st.session_state.model_cache:
             try:
                 available_models = []
@@ -125,7 +118,6 @@ def get_ai_response(api_key, user_text, mode):
 
         target_model = st.session_state.model_cache["target_model"]
 
-        # 3. Generate
         model = genai.GenerativeModel(target_model)
         system_instruction = get_system_prompt(mode)
 
@@ -134,9 +126,7 @@ def get_ai_response(api_key, user_text, mode):
         response = model.generate_content(full_prompt)
         text_response = response.text
 
-        # 4. Parsing Logic for JSON modes
         if mode in ["Quiz", "Flashcards"]:
-            # Clean up potential markdown code blocks
             clean_text = text_response.replace("```json", "").replace("```", "").strip()
             try:
                 return json.loads(clean_text)
@@ -148,7 +138,6 @@ def get_ai_response(api_key, user_text, mode):
     except Exception as e:
         return f"Error: {str(e)}"
 
-# --- STYLING (CSS) ---
 def apply_theme():
     st.markdown(
         """
@@ -258,9 +247,7 @@ def apply_theme():
         unsafe_allow_html=True,
     )
 
-# --- INIT SESSION STATE ---
 if "page" not in st.session_state: st.session_state.page = "Home"
-# DEFAULT API KEY SET HERE
 if "api_key" not in st.session_state: st.session_state.api_key = "AIzaSyBf-kROykmRTMQRYhLLt8Q20Tr6SyyRB5Y"
 if "current_note_content" not in st.session_state: st.session_state.current_note_content = ""
 if "current_note_title" not in st.session_state: st.session_state.current_note_title = ""
@@ -271,17 +258,13 @@ if "fc_flipped" not in st.session_state: st.session_state.fc_flipped = False
 
 apply_theme()
 
-# --- HORIZONTAL NAVBAR ---
-# Using columns with vertical_alignment="center" to align logo and buttons perfectly
 navbar_container = st.container()
 with navbar_container:
-    # Increased widths for button columns to support larger buttons
     c_logo, c_space, c_h, c_d, c_n, c_a, c_s = st.columns(
         [3, 0.5, 1.5, 1.5, 1.5, 1.5, 1.5], gap="small", vertical_alignment="center"
     )
 
     with c_logo:
-        # Robust path detection for the Logo
         base_dir = os.path.dirname(os.path.abspath(__file__))
         logo_path = os.path.join(base_dir, "Logo.png")
         if os.path.exists(logo_path):
@@ -314,7 +297,6 @@ with navbar_container:
         unsafe_allow_html=True,
     )
 
-# --- PAGE: HOME ---
 if st.session_state.page == "Home":
     c_hero_text, c_hero_img = st.columns([1.5, 1], gap="large")
     with c_hero_text:
@@ -340,7 +322,6 @@ if st.session_state.page == "Home":
         if os.path.exists(home_path):
             st.image(home_path, use_container_width=True)
         else:
-            # Fallback placeholder if image missing
             st.markdown("<!-- home.png placeholder -->")
 
     st.markdown("<br><br><br>", unsafe_allow_html=True)
@@ -360,7 +341,6 @@ if st.session_state.page == "Home":
             st.markdown("#### 💾 Organize")
             st.write("A centralized digital notebook to manage your revision materials.")
 
-# --- PAGE: DASHBOARD ---
 elif st.session_state.page == "Dashboard":
     c_title, c_search = st.columns([3, 1.5])
     with c_title:
@@ -371,7 +351,6 @@ elif st.session_state.page == "Dashboard":
             "Search", placeholder="🔍 Search notes...", label_visibility="collapsed"
         )
 
-    # API Key Warning
     if not st.session_state.api_key:
         st.markdown("<br>", unsafe_allow_html=True)
         with st.container(border=True):
@@ -425,7 +404,6 @@ elif st.session_state.page == "Dashboard":
                     try:
                         reader = pypdf.PdfReader(uploaded_file)
                         text = ""
-                        # Performance Limit
                         max_pages = min(len(reader.pages), MAX_PDF_PAGES)
                         for i in range(max_pages):
                             page_text = reader.pages[i].extract_text()
@@ -450,7 +428,6 @@ elif st.session_state.page == "Dashboard":
     if not notes:
         st.info("No activity found. Start a new project above.")
     else:
-        # Show last 3 notes
         for note in reversed(notes[-3:]):
             with st.container(border=True):
                 col_a, col_b = st.columns([5, 1])
@@ -465,7 +442,6 @@ elif st.session_state.page == "Dashboard":
                     st.session_state.page = "Editor"
                     st.rerun()
 
-# --- PAGE: MY NOTES ---
 elif st.session_state.page == "My Notes":
     st.title("My Notebook")
     notes = load_notes()
@@ -486,7 +462,6 @@ elif st.session_state.page == "My Notes":
                     delete_note(note["title"])
                     st.rerun()
 
-# --- PAGE: ABOUT US ---
 elif st.session_state.page == "About Us":
     st.title("About DecodEd")
 
@@ -518,7 +493,6 @@ elif st.session_state.page == "About Us":
         of research. This allows me to solve real-life problems effectively.
         """)
 
-# --- PAGE: SETTINGS ---
 elif st.session_state.page == "Settings":
     st.title("Settings")
     with st.container(border=True):
@@ -531,7 +505,6 @@ elif st.session_state.page == "Settings":
             st.session_state.api_key = key_input
             st.success("API Key saved! You can now use the AI features.")
 
-# --- PAGE: EDITOR ---
 elif st.session_state.page == "Editor":
     c_back, c_tit, c_sav = st.columns([1, 4, 1])
     with c_back:
@@ -607,14 +580,11 @@ elif st.session_state.page == "Editor":
                                 st.error("AI failed to generate flashcards. Try again.")
                                 
                         else:
-                            # Summary Mode
                             st.markdown(response_data)
-                            # Append result to content for saving
                             st.session_state.current_note_content += (
                                 f"\n\n--- AI {mode} ---\n{response_data}"
                             )
 
-# --- PAGE: ACTIVE QUIZ ---
 elif st.session_state.page == "Active Quiz":
     st.button(
         "← Back to Editor",
@@ -653,7 +623,6 @@ elif st.session_state.page == "Active Quiz":
     else:
         st.error("No quiz data found.")
 
-# --- PAGE: ACTIVE FLASHCARDS ---
 elif st.session_state.page == "Active Flashcards":
     st.button(
         "← Back to Editor",
@@ -666,11 +635,9 @@ elif st.session_state.page == "Active Flashcards":
         card = st.session_state.flashcard_data[idx]
         total = len(st.session_state.flashcard_data)
         
-        # Progress Bar
         st.progress((idx + 1) / total)
         st.caption(f"Card {idx + 1} of {total}")
         
-        # Display Card
         content = card["back"] if st.session_state.fc_flipped else card["front"]
         st.markdown(
             f"""<div class="flashcard">{content}</div>""", unsafe_allow_html=True
