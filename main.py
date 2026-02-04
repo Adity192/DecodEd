@@ -56,6 +56,7 @@ def get_system_prompt(mode):
         "You are an expert Grade 10 Academic Tutor named 'DecodEd'. "
         "Strictly adhere to the facts in the provided text. "
         "Do not hallucinate information not present in the source."
+         "For math PDFs do not give too many theoretical questions give more equations and questions with sums."
     )
 
     if mode == "Summary":
